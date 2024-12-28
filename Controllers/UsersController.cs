@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 namespace NetApi.Controllers
 {
@@ -48,9 +47,22 @@ namespace NetApi.Controllers
             return Ok(_users);
         }
 
+        // GET: api/users/username?id={id}
+        [HttpGet("username")]
+        public ActionResult<string> GetUsernameById([FromQuery] int id)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(user.Name);
+        }
+
         // POST: api/users
         [HttpPost]
-        public ActionResult<User> AddUser([FromBody] User newUser)
+        public ActionResult<int> AddUser([FromBody] User newUser)
         {
             if (newUser == null || string.IsNullOrWhiteSpace(newUser.Name))
             {
@@ -62,7 +74,8 @@ namespace NetApi.Controllers
             _users.Add(newUser);
             SaveToFile();
 
-            return CreatedAtAction(nameof(GetUsers), new { id = newUser.Id }, newUser);
+            // Return the ID of the new user
+            return Ok(newUser.Id);
         }
 
         // PUT: api/users/{id}
